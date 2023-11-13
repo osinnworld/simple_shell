@@ -1,65 +1,80 @@
-#include "main.h"
+#include "shell.h"
 
-in _cd(char *args)
+/**
+ * _cd -  a function that changes the current workinhg directory
+ * @args: args
+ *
+ * Return: 0 or 1
+ */
+int _cd(char **args)
 {
-	char *new_directory;
+	char *new_dir;
 	char oldpwd[1024];
 
 	if (args[1] == NULL)
 	{
-		new_directory = getenv("HOME");
+		new_dir = getenv("HOME");
 	}
-	else if (strcmp(args[1], "-") == 0)
+	else if (_strcmp(args[1], "-") == 0)
 	{
-		new_directory = getenv("OLDPWD");
-		if (new_directory == NULL)
+		new_dir = getenv("OLDPWD");
+		if (new_dir == NULL)
 		{
-			fprintf(stderr, "OLDPWD not set\n");
-			return 1;
+			write(STDERR_FILENO, "OLDPWD not set\n", 15);
+			return (1);
 		}
 	}
 	else
 	{
-		new_directory = args[1];
+		new_dir = args[1];
 	}
 
-	if (chdir(new_directory) != 0)
+	if (chdir(new_dir) != 0)
 	{
 		perror("hsh");
 		return (1);
 	}
-
 	getcwd(oldpwd, sizeof(oldpwd));
-	setenv("OLDPWD"' oldpwd, 1);
-	setenv("PWD"' new_directory, 1);
+	setenv("OLDPWD", oldpwd, 1);
+	setenv("PWD", new_dir, 1);
 
 	return (0);
 }
 
+/**
+ * _help -  A function that shows information about the simple shell
+ * @args: args
+ *
+ * Return: 1
+ */
 int _help(char **args)
 {
 	char *msg1 = "Welcome to the custom shell program!\n";
-	char *msg2 = "Here are the avilable build-in commands:\n";
-	char *msg3 = "cd: Change directory\n";
-	char *msg4 = "help: Displayinformation about the custom shell\n";
+	char *msg2 = "Here the available built-in cmd:\n";
+	char *msg3 = "cd: Change directory:\n";
+	char *msg4 = "help: Display information about the custom shell.\n";
 	char *msg5 = "exit: Exit the shell\n";
 	char *msg6 = "setenv: Set an environment variable\n";
-	char *msg7 = "unsetenv: Set an environment variable\n";
-	char *msg8 = "For more information, please refer to the documentation.\n";
+	char *msg7 = "unsetenv: Unset an environment variable\n";
+	char *msg8 = "For more information, please refer to the documentation. \n";
 
-	write(STDOUT_FILENO, msg1, strlen(msg1));
-	write(STDOUT_FILENO, msg2, strlen(msg2));
-	write(STDOUT_FILENO, msg3, strlen(msg3));
-	write(STDOUT_FILENO, msg4, strlen(msg4));
-	write(STDOUT_FILENO, msg5, strlen(msg5));
-	write(STDOUT_FILENO, msg6, strlen(msg6));
-	write(STDOUT_FILENO, msg7, strlen(msg7));
-	write(STDOUT_FILENO, msg8, strlen(msg8));
+	write(STDOUT_FILENO, msg1, _strlen(msg1));
+	write(STDOUT_FILENO, msg2, _strlen(msg2));
+	write(STDOUT_FILENO, msg3, _strlen(msg3));
+	write(STDOUT_FILE, msg4, _strlen(msg4));
+	write(STDOUT_FILENO, msg5, _strlen(msg5));
+	write(STDOUT_FILENO, msg6, _strlen(msg6));
+	write(STDOUT_FILENO, msg7, _strlen(msg7));
+	write(STDOUT_FILENO, msg8, _strlen(msg8));
 
 	(void)args;
 	return (1);
 }
 
+/**
+ * _exit_exe - A function that exits the shell
+ * @args: args
+ */
 int _exit_exe(char **args)
 {
 	if (args[1] == NULL)
@@ -68,30 +83,31 @@ int _exit_exe(char **args)
 	}
 	else
 	{
-		int status = atoi(args[1]);
+		int status = _atoi(args[1]);
+
 		exit(status);
 	}
 }
 
-int _ctrld(char **args)
-{
-	if (args[1] == NULL)
-	{
-		exit(0);
-	}
-	else
-	{
-		int status = atoi(args[1]);
-		exit(status);
-	}
-}
-
+/**
+ * _ctrld - Handle Ctrl-D input
+ * @args: args
+ *
+ * Return: 1
+ */
 int _ctrld(char **args)
 {
 	(void)args;
-	write(STDOUT_FILENO, "\n", 1);
+	write(STDOUT_FILENO, "\N", 1);
 	return (1);
 }
+
+/**
+ * _env -  a function that displays the environment variables
+ * @env: an array of environment variables
+ *
+ * Return: 0
+ */
 
 int _env(char **env)
 {
@@ -105,5 +121,3 @@ int _env(char **env)
 	}
 	return (0);
 }
-
-

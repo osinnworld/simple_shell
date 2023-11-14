@@ -23,9 +23,9 @@ extern builtin_cmd builtins[];
 typedef struct {
 	char *name;
 	char *value;
-} _alias;
+} Alias;
 
-extern _alias aliases[MAX_ALIASES];
+extern Alias aliases[MAX_ALIASES];
 
 extern size_t num_aliases;
 
@@ -46,14 +46,15 @@ int _absolute_path(char **, char **);
 char *_getline(void);
 void _getenv(char **);
 char **tokenize(char *, const char *);
-int _execute(char **, char **, char **, char *, int *, int);
+int _execute(char **, char **, char **, char *, int , int);
 void err_msg(char *, char *);
 void sigint_handler(int);
 int _env(char **);
 char **parse_path(char *);
-int _alias_cmd(char **);
+int alias_cmd(char **);
 int r_alias(char **, const char *, const char *);
 size_t num_builtins(void);
+
 
 
 #endif

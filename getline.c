@@ -37,95 +37,79 @@ char *_getline(void)
 }
 
 /**
- * create_token - create a token from given token string
- * @token_str: pointer to token
- *
- * Return: pointer to created token
- */
-char *create_token(char *token_str)
-{
-	return (strdup(token_str));
-}
-
-
-/**
- * add_token - add a token to array of token
- * @cmd: pointer to array of token
- * @token: pointer to token to add
- * @count: pointer to count of token
- */
-void add_token(char ***cmd, char *token, int *count)
-{
-	*cmd = realloc(*cmd, sizeof(char *) * (*count + 1));
-	if (*cmd == NULL)
-		return;
-	(*cmd)[*count] = create_token(token);
-	(*count)++;
-}
-
-/**
- * process_token - process the current and add it to the array
- * @cmd: pointer to array of token
- * @token: pointer to current token
- * @count: pointer to count of token
- */
-void process_token(char ***cmd, char *token, int *count)
-{
-	if (token != NULL)
-	{
-		add_token(cmd, token, count);
-	}
-}
-
-
-/**
  * tokenize - tokenize a string based on delimiters
  * @lineptr: The input string to tokenize
  * @delimiters: The delimiters to use for tokenization
  *
- * Return: An array of tokens (strings), or NULL on failure or empty imput
+ * Return: An array of tokens (strings)
  */
-char **tokenize(char *lineptr, const char *delimiters)
+char **tokenize(char *ptr, const char *delimiters)
 {
 	char **cmd = NULL;
 	char *token = NULL;
 	size_t i = 0;
 	int count = 0;
+	int tk = 0;
 
-	if (lineptr == NULL || lineptr[0] == '\0')
+	if (ptr == NULL || ptr[0] == '\0')
 	{
 		return (NULL);
 	}
 
-	for (i = 0; lineptr[i] != '\0'; i++)
+	for (i = 0; ptr[i] != '\0'; i++)
 	{
-		if (strchr(delimiters, lineptr[i]) != NULL)
+		if (strchr(delimiters, ptr[i]) != NULL)
 		{
-			if (token != NULL)
+			if (tk)
 			{
-				lineptr[i] = '\0';
-				process_token(&cmd, token, &count);
-				free(token);
-				token = NULL;
+				ptr[i] = '\0';
+				cmd = realloc(cmd, sizeof(char *) * (count + 1));
+				if (cmd == NULL)
+					return (NULL);
+				cmd[count] = strdup(token);
+				count++;
+				tk = 0;
 			}
 		}
-		else if (lineptr[i] == '&' && lineptr[i + 1] == '&')
+		else if (ptr[i] == '&' && ptr[i + 1] == '&')
 		{
-			process_token(&cmd, token, &count);
-			add_token(&cmd, "&&", &count);
-			token = NULL;
+			if (tk)
+			{
+				ptr[i] = '\0';
+				cmd = realloc(cmd, sizeof(char *) * (count + 1));
+				if (cmd == NULL)
+					return (NULL);
+				cmd[count] = strdup(token);
+				count++;
+				tk = 0;
+			}
+			cmd = realloc(cmd, sizeof(char *) * (count + 1));
+			if (cmd == NULL)
+				return (NULL);
+			cmd[count] = strdup("&&");
+			count++;
 			i++;
 		}
 		else
 		{
-			if (token == NULL)
+			if (!tk)
 			{
-				token = &lineptr[i];
+				token = &ptr[i];
+				tk = 1;
 			}
 		}
 	}
-	process_token(&cmd, token, &count);
-	add_token(&cmd, NULL, &count);
-
+	if (tk)
+	{
+		cmd = realloc(cmd, sizeof(char *) * (count + 1));
+		if (cmd == NULL)
+			return (NULL);
+		cmd[count] = strdup(token);
+		count++;
+	}
+	cmd = realloc(cmd, sizeof(char *) * (count + 1));
+	if (cmd == NULL)
+		return (NULL);
+	cmd[count] = NULL;
 	return (cmd);
 }

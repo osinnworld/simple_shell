@@ -1,22 +1,21 @@
 #include "shell.h"
-
-int process_path(char **arg, char **paths);
-char *build_path(char *arg, char *path, size_t len);
-
 /**
- * _absolute_path - get absolute path of cmd
+ * _absolute_path - absolute path cmd
  * @arg: absolute path
  * @env: env variable
  *
- * Return: 0 or -1
+ * Return: 0 or 1
  */
 int _absolute_path(char **arg, char **env)
 {
-	char *r_path = NULL;
-	char **path = NULL;
-	int result;
-
+	char *r_path = NULL, *abs_path = NULL;
+	size_t len;
 	struct stat st;
+	char **path;
+	size_t i;
+
+	(void)env;
+
 	if (stat(*arg, &st) == 0)
 		return (-1);
 
@@ -29,79 +28,120 @@ int _absolute_path(char **arg, char **env)
 	}
 
 	path = parse_path(r_path);
-	result = process_path(arg, path);
 
-	free(r_path);
-	free(path);
-
-	return (result);
-}
-
-/**
- * process_path - process each path
- * @arg: absolute path
- * @paths: array of path
- *
- * Return: 0 or -1
- */
-int process_path(char **arg, char **paths)
-{
-	size_t len, i;
-	char *abs_path;
-
-	for (i = 0; paths[i] != NULL; i++)
+	for (i = 0; path[i] != NULL; i++)
 	{
-		struct stat st;
-		len = _strlen(*arg) + _strlen(paths[i]) + 2;
-		abs_path = build_path(*arg, paths[i], len);
+		len = _strlen(*arg) + _strlen(path[i]) + 2;
+		abs_path = malloc(sizeof(char) * len);
 
 		if (!abs_path)
 		{
+			free(r_path);
+			free(path);
 			return (-1);
 		}
+
+		_strcpy(abs_path, path[i]);
+		_strcat(abs_path, "/");
+		_strcat(abs_path, *arg);
 
 		if (stat(abs_path, &st) == 0)
 		{
 			free(*arg);
 			*arg = strdup(abs_path);
+			free(r_path);
+			free(path);
 			free(abs_path);
 			return (0);
 		}
 		free(abs_path);
 	}
+	free(r_path);
+	free(path);
 	return (-1);
 }
 
 /**
- * build_path - build absolute path
- * @arg: absolute path
- * @path: current path
- * @len: length
- *
- * Return: absolute path
- */
-char *build_path(char *arg, char *path, size_t len)
-{
-	char *abs_path = malloc(sizeof(char) * len);
-
-	if (!abs_path)
-		return (NULL);
-
-	_strcpy(abs_path, path);
-	_strcat(abs_path, "/");
-	_strcat(abs_path, arg);
-
-	return (abs_path);
-}
-
-/**
- * parse_path - Parse the PATH environment
+ * parse_path - Parse the PATH
  * @path: env variable
  *
- * Return: Array of string
+ * Return: array of string
  */
 char **parse_path(char *path)
 {
 	return (tokenize(path, ":"));
 }
+
+/**
+ * _getenv - Display env variable
+ * @env: env variable
+ *
+ * Return: Array of string containing paths
+ */
+void _getenv(char **env)
+{
+	size_t run = 0;
+
+	while (env[run])
+	{
+		write(STDOUT_FILENO, env[run], _strlen(env[run]));
+		write(STDOUT_FILENO, "\n", 1);
+		run++;
+	}
+}
+
+/**
+ * _get_path - Get value of PATH
+ * @env: array of env variable
+ *
+ * Return: PATH
+ */
+char *_get_path(char **env)
+{
+	size_t index = 0, var = 0;
+	size_t count = 5;
+	char *path = NULL;
+
+	for (index = 0; env[index] != NULL && strncmp(env[index], "PATH=", 5) != 0; index++)
+		;
+	if (env[index] == NULL)
+		return (NULL);
+	for (count = 5; env[index][count]; count++)
+		;
+	path = malloc(sizeof(char) * (count + 1));
+
+	if (path == NULL)
+		return (NULL);
+
+	for (var = 5, count = 0; env[index][var]; var++, count++)
+		path[count] = env[index][var];
+
+	path[count] = '\0';
+	return (path);
+}
+
+/**
+ * r_alias - Replace an alias in the cmd
+ * @cmd: arg to check and replace aliases
+ * @alias: alias to be replaced
+ * @value: value to replace
+ *
+ * Return: 1 or 0
+ */
+int r_alias(char **cmd, const char *alias, const char *value)
+{
+	int i, r = 0;
+
+	for (i = 0; cmd[i] != NULL; i++)
+	{
+		if (_strcmp(cmd[i], alias) == 0)
+		{
+			free(cmd[i]);
+			cmd[i] = strdup(value);
+			r = 1;
+		}
+	}
+	return (r);
+}
+
 

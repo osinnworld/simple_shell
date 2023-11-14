@@ -61,7 +61,7 @@ int _help(char **args)
 	write(STDOUT_FILENO, msg1, _strlen(msg1));
 	write(STDOUT_FILENO, msg2, _strlen(msg2));
 	write(STDOUT_FILENO, msg3, _strlen(msg3));
-	write(STDOUT_FILE, msg4, _strlen(msg4));
+	write(STDOUT_FILENO, msg4, _strlen(msg4));
 	write(STDOUT_FILENO, msg5, _strlen(msg5));
 	write(STDOUT_FILENO, msg6, _strlen(msg6));
 	write(STDOUT_FILENO, msg7, _strlen(msg7));
@@ -74,6 +74,8 @@ int _help(char **args)
 /**
  * _exit_exe - A function that exits the shell
  * @args: args
+ *
+ * Return: None
  */
 int _exit_exe(char **args)
 {
@@ -83,7 +85,7 @@ int _exit_exe(char **args)
 	}
 	else
 	{
-		int status = _atoi(args[1]);
+		int status = atoi(args[1]);
 
 		exit(status);
 	}
@@ -98,7 +100,7 @@ int _exit_exe(char **args)
 int _ctrld(char **args)
 {
 	(void)args;
-	write(STDOUT_FILENO, "\N", 1);
+	write(STDOUT_FILENO, "\n", 1);
 	return (1);
 }
 

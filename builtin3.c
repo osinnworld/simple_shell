@@ -10,7 +10,7 @@ int _setenv(char **args)
 {
 	if (args[1] == NULL || args[2] == NULL)
 	{
-		write(STDERR_FILENO, "setenv: invalid arguments\n", 26);
+		perror("setenv: Invalid arguments");
 		return (-1);
 	}
 
@@ -26,7 +26,7 @@ int _setenv(char **args)
 
 /**
  * _unsetenv - a function taht unsets env variable
- * @args: array of args
+ * @args: args
  *
  * Return: 0 or -1
  */
@@ -34,7 +34,13 @@ int _unsetenv(char **args)
 {
 	if (args[1] == NULL)
 	{
-		write(STDERR_FILENO, "unsetenv: variable name not provided\n", 37);
+		perror("unsetenv: Variable name not provided");
+		return (-1);
+	}
+
+	if (unsetenv(args[1]) != 0)
+	{
+		perror("unsetenv");
 		return (-1);
 	}
 

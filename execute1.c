@@ -1,114 +1,75 @@
 #include "shell.h"
 
-extern Alias aliases[MAX_ALIASES];
 /**
  * _execute - execute a cmd
  * @arg: argss
  * @av: array of string
  * @env: env variable
  * @ptr: ptr to line
- * @fm: free memory
+ * @np: arg
+ * @c: arg
  *
- * Return: status of cmd
+ * Return: exit
  */
-int _execute(char **arg, char **av, char **env, char *ptr, int prc, int fm)
+int _execute(char **arg, char **av, char **env, char *ptr, int np, int c)
 {
 	pid_t child;
-	int status;
-	size_t i = 0;
-	int nxt = 1;
-	(void)prc;
+	int status, i = 0;
 
-	if (arg == NULL || arg[0] == NULL)
+	if (arg[0] == NULL)
 		return (1);
 
 	for (i = 0; i < num_builtins(); i++)
 	{
-		if (_strcmp(arg[0], builtins[i].command) == 0)
-			return (builtins[i].func(arg));
+		if (_strcmp(arg[0], builtin_str[i]) == 0)
+			return (builtin_func[i](arg));
 	}
 
-	for (i = 0; i < num_aliases; i++)
+	child = fork();
+	if (child == 0)
 	{
-		while (r_alias(arg, aliases[i].name, aliases[i].value))
-			;
-	}
-
-	for (i = 0; arg[i] != NULL; i++)
-	{
-		if (_strcmp(arg[i], "&&") == 0 || _strcmp(arg[i], "||") == 0)
+		if (execve(arg[0], arg, env) == -1)
 		{
-			char **cmd1, **cmd2;
-			int op_and = _strcmp(arg[i], "&&") == 0;
-			int prv_cmd = status == 0;
-
-			nxt = op_and ? prv_cmd : !prv_cmd;
-
-			arg[i] = NULL;
-			cmd1 = arg;
-			cmd2 = &arg[i + 1];
-
-			if (nxt)
+			if (errno == ENOENT)
 			{
-				child = fork();
-				if (child == 0)
-				{
-					if (execve(cmd1[0], cmd1, env) == -1)
-					{
-						err_msg(cmd1[0], av[0]);
-						if (!fm)
-							free(cmd1[0]);
-						free(cmd1);
-						free(ptr);
-						exit(errno);
-					}
-				}
-				else
-				{
-					wait(&status);
-					if ((op_and && status != 0) || (!op_and && status == 0))
-					{
-						nxt = 0;
-						break;
-					}
-				}
+				err_msg(arg[0], av[0], 127);
 			}
-			arg = cmd2;
-			i = -1;
+			else
+			{
+				perror("execve");
+				exit(EXIT_FAILURE);
+			}
 		}
 	}
-	if (nxt)
+	else
 	{
-		child = fork();
-		if (child == 0)
+		wait(&status);
+
+		if (WIFEXITED(status))
 		{
-			if (execve(arg[0], arg, env) == -1)
-			{
-				err_msg(arg[0], av[0]);
-				if (!fm)
-					free(arg[0]);
-				free(arg);
-				free(ptr);
-				exit(errno);
-			}
+			return WEXITSTATUS(status);
 		}
 		else
 		{
+<<<<<<< HEAD
 			wait(&status);
 			free(arg[0]);
 			free(arg);
+=======
+>>>>>>> b03e48f0a313c7644af036e91745f37eff6fb6e8
 			return (status);
 		}
 	}
+
 	return (0);
 }
-
 /**
  * err_msg - display error msg
  * @command: cmd causing error
  * @pg: program name
+ * @status: arg
  */
-void err_msg(char *command, char *pg)
+void err_msg(char *command, char *pg int status)
 {
 	char *err_msg = pg;
 	char *err_msg2 = ": 1: ";
@@ -118,5 +79,5 @@ void err_msg(char *command, char *pg)
 	write(STDERR_FILENO, err_msg2, _strlen(err_msg2));
 	write(STDERR_FILENO, command, _strlen(command));
 	write(STDERR_FILENO, err_msg3, _strlen(err_msg3));
-	exit(EXIT_FAILURE);
+	exit(status);
 }

@@ -9,8 +9,13 @@
 int _cd(char **args)
 {
 	char *new_dir;
-	char oldpwd[1024];
+	char *old_pwd = NULL;
 
+	if ((old_pwd = (char *)malloc(1024 * sizeof(char))) == NULL)
+	{
+		perror("malloc");
+		return (1);
+	}
 	if (args[1] == NULL)
 	{
 		new_dir = getenv("HOME");
@@ -21,6 +26,7 @@ int _cd(char **args)
 		if (new_dir == NULL)
 		{
 			write(STDERR_FILENO, "OLDPWD not set\n", 15);
+			free(old_pwd);
 			return (1);
 		}
 	}
@@ -32,11 +38,21 @@ int _cd(char **args)
 	if (chdir(new_dir) != 0)
 	{
 		perror("hsh");
+		free(old_pwd);
 		return (1);
 	}
-	getcwd(oldpwd, sizeof(oldpwd));
-	setenv("OLDPWD", oldpwd, 1);
+
+	if (getcwd(old_pwd, 1024) == NULL)
+	{
+		perror("hsh");
+		free(old_pwd);
+		return (1);
+	}
+
+	setenv("OLDPWD", old_pwd, 1);
 	setenv("PWD", new_dir, 1);
+
+	free(old_pwd);
 
 	return (0);
 }
@@ -50,7 +66,7 @@ int _cd(char **args)
 int _help(char **args)
 {
 	char *msg1 = "Welcome to the custom shell program!\n";
-	char *msg2 = "Here the available built-in cmd:\n";
+	char *msg2 = "Here the available built-in commands:\n";
 	char *msg3 = "cd: Change directory:\n";
 	char *msg4 = "help: Display information about the custom shell.\n";
 	char *msg5 = "exit: Exit the shell\n";
@@ -75,20 +91,12 @@ int _help(char **args)
  * _exit_exe - A function that exits the shell
  * @args: args
  *
- * Return: None
+ * Return: exit status
  */
 int _exit_exe(char **args)
 {
-	if (args[1] == NULL)
-	{
-		exit(0);
-	}
-	else
-	{
-		int status = atoi(args[1]);
-
-		exit(status);
-	}
+	int status = args[1] ? atoi(args[1]) : 0;
+	return (status);
 }
 
 /**

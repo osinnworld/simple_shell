@@ -11,7 +11,6 @@
 #include <errno.h>
 #include <signal.h>
 
-#define MAX_ALIASES 50
 
 typedef struct {
 	char *command;
@@ -25,9 +24,6 @@ typedef struct {
 	char *value;
 } Alias;
 
-extern Alias aliases[MAX_ALIASES];
-
-extern size_t num_aliases;
 
 int _setenv(char **);
 int _unsetenv(char **);
@@ -35,26 +31,20 @@ int _ctrld(char **);
 int _cd(char **);
 int _help(char **);
 int _exit_exe(char **);
-size_t _strncmp(char *, char *, size_t);
-int _strlen(char *);
-char *_strcpy(char *, const char *);
-char *_strcat(char *, char *);
-int _strcmp(const char *, const char *);
 
-char *_get_path(char **);
-int _absolute_path(char **, char **);
+int _strcmp(char *s1, char *s2);
+size_t _strncmp(char *s1, char *s2, size_t n);
+int _strlen(char *s);
+char *_strcpy(char *dest, char *src);
+char *_strcat(char *dest, char *src);
+
+int _execute(char **arg, char **av, char **env, char *ptr, int np, int c);
+void err_msg(char *command, char *pg, int status);
+int _absolute_path(char **arg, char **env);
+char *_get_path(char **env);
 char *_getline(void);
-void _getenv(char **);
-char **tokenize(char *, const char *);
-int _execute(char **, char **, char **, char *, int , int);
-void err_msg(char *, char *);
-void sigint_handler(int);
-int _env(char **);
-char **parse_path(char *);
-int alias_cmd(char **);
-int r_alias(char **, const char *, const char *);
-size_t num_builtins(void);
-
-
+char **tokenize(char *ptr);
+int num_builtins(void);
+int _execute_builtin(char **args);
 
 #endif

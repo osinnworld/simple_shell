@@ -95,6 +95,8 @@ int _execute(char **arg, char **av, char **env, char *ptr, int prc, int fm)
 		else
 		{
 			wait(&status);
+			free(arg[0]);
+			free(arg);
 			return (status);
 		}
 	}

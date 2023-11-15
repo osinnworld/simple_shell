@@ -17,9 +17,10 @@ int _setenv(char **args)
 	if (setenv(args[1], args[2], 1) != 0)
 	{
 		perror("setenv");
+		free(args[2]);
 		return (-1);
 	}
-
+	free(args[2]);
 	return (0);
 }
 

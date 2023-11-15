@@ -4,7 +4,7 @@ builtin_cmd builtins[] = {
 	{"cd", &_cd},{"help", &_help},
 	{"exit", &_exit_exe},{"^D", &_ctrld},
 	{"env", &_env},{"setenv", &_setenv},
-	{"unsetenv", &_unsetenv},{"_alias", &alias_cmd},
+	{"unsetenv", &_unsetenv},
 };
 
 
@@ -13,7 +13,7 @@ builtin_cmd builtins[] = {
  *
  * Return: No of builtin commands
  */
-size_t num_builtins(void)
+int num_builtins(void)
 {
 	return (sizeof(builtins) / sizeof(builtins[0]));
 }
@@ -40,9 +40,8 @@ void sigint_handler(int signum)
  */
 int main(int ac, char **av, char **env)
 {
-	int value = 0, status = 0, path = 0;
-	char *line = NULL;
-	char *token;
+	char **cmd = NULL, *line = NULL;
+	int path = 0; status = 0; value = 0;
 
 	(void)ac;
 
@@ -57,38 +56,28 @@ int main(int ac, char **av, char **env)
 		if (line)
 		{
 			value++;
+			cmd = tokenize(line);
+			if (!cmd)
+				free(line);
 
-			token = strtok(line, ";");
-
-			while (token != NULL)
+			int blt = _execute_builtin(cmd);
+			if (blt)
 			{
-				char **cmd = tokenize(token, " \t\n\r");
-				if (cmd != NULL && cmd[0] != NULL)
-				{
-					if (!_strcmp(cmd[0], "env"))
-					{
-						_getenv(env);
-					}
-					else if (!_strcmp(cmd[0], "alias"))
-					{
-						alias_cmd(cmd);
-					}
-					else
-					{
-						path = _absolute_path(&cmd[0], env);
-						status = _execute(cmd, av, env, line, value, path);
-						if (status == 200)
-						{
-							free(line);
-							return (0);
-						}
-						if (path == 0)
-							free(cmd[0]);
-					}
-					free(cmd);
-				}
-				token = strtok(NULL, ";");
+				status = blt;
 			}
+			else
+			{
+				path = _absolute_path(&cmd[0], env);
+				status = _execute(cmd, av, env, line, value, path);
+				if (status == 200)
+				{
+					free(line);
+					return (0);
+				}
+				if (path == 0)
+					free(cmd[0]);
+			}
+			free(cmd);
 		}
 		else
 		{
@@ -99,4 +88,25 @@ int main(int ac, char **av, char **env)
 		free(line);
 	}
 	return (status);
+}
+
+
+/**
+ * _execute_builtin - execute a builtin cmd
+ * args: args
+ *
+ * Returb: status
+ */
+int _execute_builtin(char **args)
+{
+	int i;
+
+	for (i = 0; i < num_builtins(); i++)
+	{
+		if (_strcmp(args[0], builtins[i].name) == 0)
+		{
+			return (builtins[i].func(args));
+		}
+	}
+	return (0);
 }

@@ -42,7 +42,7 @@ char **tokenize(char *ptr)
 
 	for (i = 0; ptr[i]; i++)
 	{
-		if (ptr[i] == NULL)
+		if (ptr[i] == '\0')
 		{
 			size++;
 		}

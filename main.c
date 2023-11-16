@@ -41,7 +41,8 @@ void sigint_handler(int signum)
 int main(int ac, char **av, char **env)
 {
 	char **cmd = NULL, *line = NULL;
-	int path = 0; status = 0; value = 0;
+	int path = 0, status = 0, value = 0;
+	int blt;
 
 	(void)ac;
 
@@ -59,23 +60,32 @@ int main(int ac, char **av, char **env)
 			cmd = tokenize(line);
 			if (!cmd)
 				free(line);
+			if (_strcmp(cmd[0], "exit") == 0)
+			{
+				free(cmd);
+				free(line);
+				return _exit_exe(cmd);
+			}
 
-			int blt = _execute_builtin(cmd);
+			blt = _execute_builtin(cmd);
 			if (blt)
 			{
 				status = blt;
 			}
 			else
 			{
-				path = _absolute_path(&cmd[0], env);
-				status = _execute(cmd, av, env, line, value, path);
-				if (status == 200)
+				if (cmd)
 				{
-					free(line);
-					return (0);
+					path = _absolute_path(&cmd[0], env);
+					status = _execute(cmd, av, env);
+					if (status == 200)
+					{
+						free(line);
+						return (0);
+					}
+					if (path == 0)
+						free(cmd[0]);
 				}
-				if (path == 0)
-					free(cmd[0]);
 			}
 			free(cmd);
 		}
@@ -103,7 +113,7 @@ int _execute_builtin(char **args)
 
 	for (i = 0; i < num_builtins(); i++)
 	{
-		if (_strcmp(args[0], builtins[i].name) == 0)
+		if (_strcmp(args[0], builtins[i].command) == 0)
 		{
 			return (builtins[i].func(args));
 		}

@@ -38,7 +38,7 @@ int _strlen(char *s);
 char *_strcpy(char *dest, char *src);
 char *_strcat(char *dest, char *src);
 
-int _execute(char **arg, char **av, char **env, char *ptr, int np, int c);
+int _execute(char **arg, char **av, char **env);
 void err_msg(char *command, char *pg, int status);
 int _absolute_path(char **arg, char **env);
 char *_get_path(char **env);
@@ -46,5 +46,8 @@ char *_getline(void);
 char **tokenize(char *ptr);
 int num_builtins(void);
 int _execute_builtin(char **args);
+
+int num_builtins(void);
+int _env(char **env);
 
 #endif

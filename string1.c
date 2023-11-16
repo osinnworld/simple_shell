@@ -45,7 +45,7 @@ int _strlen(char *s)
  *
  * Return: 0 or 1
  */
-int _strcmp(const char *s1, const char *s2)
+int _strcmp(char *s1, char *s2)
 {
 	int j, i = 0;
 
@@ -87,7 +87,7 @@ size_t _strncmp(char *s1, char *s2, size_t n)
  *
  * Return: pointer to the resulting string
  */
-char *_strcpy(char *dest, const char *src)
+char *_strcpy(char *dest, char *src)
 {
 	int i = 0;
 

@@ -95,7 +95,8 @@ int _help(char **args)
  */
 int _exit_exe(char **args)
 {
-	int status = args[1] ? atoi(args[1]) : 0;
+	int status;
+	status = args[1] ? atoi(args[1]) : 0;
 	return (status);
 }
 
@@ -108,8 +109,8 @@ int _exit_exe(char **args)
 int _ctrld(char **args)
 {
 	(void)args;
-	write(STDOUT_FILENO, "\n", 1);
-	return (1);
+	free(args);
+	return (200);
 }
 
 /**

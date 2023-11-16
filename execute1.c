@@ -5,13 +5,10 @@
  * @arg: argss
  * @av: array of string
  * @env: env variable
- * @ptr: ptr to line
- * @np: arg
- * @c: arg
  *
  * Return: exit
  */
-int _execute(char **arg, char **av, char **env, char *ptr, int np, int c)
+int _execute(char **arg, char **av, char **env)
 {
 	pid_t child;
 	int status, i = 0;
@@ -21,8 +18,8 @@ int _execute(char **arg, char **av, char **env, char *ptr, int np, int c)
 
 	for (i = 0; i < num_builtins(); i++)
 	{
-		if (_strcmp(arg[0], builtin_str[i]) == 0)
-			return (builtin_func[i](arg));
+		if (_strcmp(arg[0], builtins[i].command) == 0)
+			return (builtins[i].func(arg));
 	}
 
 	child = fork();
@@ -51,12 +48,9 @@ int _execute(char **arg, char **av, char **env, char *ptr, int np, int c)
 		}
 		else
 		{
-<<<<<<< HEAD
 			wait(&status);
 			free(arg[0]);
 			free(arg);
-=======
->>>>>>> b03e48f0a313c7644af036e91745f37eff6fb6e8
 			return (status);
 		}
 	}
@@ -69,7 +63,7 @@ int _execute(char **arg, char **av, char **env, char *ptr, int np, int c)
  * @pg: program name
  * @status: arg
  */
-void err_msg(char *command, char *pg int status)
+void err_msg(char *command, char *pg, int status)
 {
 	char *err_msg = pg;
 	char *err_msg2 = ": 1: ";

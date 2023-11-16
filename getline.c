@@ -9,16 +9,31 @@ char *_getline(void)
 {
 	char *line = NULL;
 	size_t size = 0;
+	ssize_t r, i;
 
 	if (isatty(STDIN_FILENO))
 		write(STDOUT_FILENO, "$ ", 2);
 
-	if (getline(&line, &size, stdin) == -1)
+	r = getline(&line, &size, stdin);
+
+	if (r == -1)
 	{
 		free(line);
 		return (NULL);
 	}
-
+	if (line[r - 1] == '\n')
+		line[r - 1] = '\0';
+	
+	for (i = 0; i < r - 1; i++)
+	{
+		if (line[i] != ' ')
+			break;
+	}
+	if (i == r - 1)
+	{
+		free(line);
+		return (NULL);
+	}
 	return (line);
 }
 
